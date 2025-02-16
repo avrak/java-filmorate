@@ -17,11 +17,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final static Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FilmController.class);
+    private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FilmController.class);
 
-    private final int EARLIEST_FILM_YEAR = 1895;
-    private final int EARLIEST_FILM_MONTH = 12;
-    private final int EARLIEST_FILM_DAY = 28;
+    public final int EARLIEST_FILM_YEAR = 1895;
+    public final int EARLIEST_FILM_MONTH = 12;
+    public final int EARLIEST_FILM_DAY = 28;
     private final Map<Long, Film> films = new HashMap<>();
 
     public FilmController() {
@@ -92,7 +92,7 @@ public class FilmController {
     }
 
     private void checkFilmName(Film film) {
-        if(film.getName().isEmpty()) {
+        if (film.getName().isEmpty()) {
             String filmNameWarning = "Название фильма не может быть пустым";
             log.warn(filmNameWarning);
             throw new ValidationException(filmNameWarning);
@@ -107,13 +107,14 @@ public class FilmController {
         }
     }
 
-    private void checkFilmDuration(Film film){
+    private void checkFilmDuration(Film film) {
         if (film.getDuration() < 0) {
             String filmDurationWarning = "Продолжительность фильма должна быть положительным числом: '" + film.getDuration() + "'";
             log.warn(filmDurationWarning);
             throw new ValidationException(filmDurationWarning);
         }
     }
+
     private void checkFilmReleaseDate(Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(EARLIEST_FILM_YEAR, EARLIEST_FILM_MONTH, EARLIEST_FILM_DAY))) {
             String filmReleaseDateWarning = "Дата релиза должна быть не раньше 28 декабря 1895 года: '" + film.getReleaseDate() + "'";

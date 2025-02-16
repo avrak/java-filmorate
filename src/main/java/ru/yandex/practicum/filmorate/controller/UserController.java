@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final static Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(UserController.class);
+    private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(UserController.class);
 
     private final Map<Long, User> users = new HashMap<>();
 
