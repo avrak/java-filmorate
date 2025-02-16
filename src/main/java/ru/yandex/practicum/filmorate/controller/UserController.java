@@ -105,7 +105,7 @@ public class UserController {
             throw new ValidationException(loginEmptyWarning);
         }
 
-        if (user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             String loginSpacesWarning = "Логин пользователя не должен содержать пробелы: '" + user.getLogin() + "'";
             log.warn(loginSpacesWarning);
             throw new ValidationException(loginSpacesWarning);
@@ -120,7 +120,7 @@ public class UserController {
         }
 
         if (new ArrayList<>(users.values()).stream().anyMatch(userInList -> userInList.getEmail().equals(user.getEmail()))) {
-            String duplicateEmailWarning = "Этот имейл уже используется: '" + user.getEmail() +"'";
+            String duplicateEmailWarning = "Этот имейл уже используется: '" + user.getEmail() + "'";
             log.warn(duplicateEmailWarning);
             throw new ValidationException(duplicateEmailWarning);
         }
