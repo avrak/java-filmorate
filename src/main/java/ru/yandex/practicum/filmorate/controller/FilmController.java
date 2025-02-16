@@ -19,9 +19,9 @@ import java.util.Map;
 public class FilmController {
     private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FilmController.class);
 
-    public final int EARLIEST_FILM_YEAR = 1895;
-    public final int EARLIEST_FILM_MONTH = 12;
-    public final int EARLIEST_FILM_DAY = 28;
+    public static final int EARLIEST_FILM_YEAR = 1895;
+    public static final int EARLIEST_FILM_MONTH = 12;
+    public static final int EARLIEST_FILM_DAY = 28;
     private final Map<Long, Film> films = new HashMap<>();
 
     public FilmController() {
