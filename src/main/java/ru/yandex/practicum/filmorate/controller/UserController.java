@@ -23,11 +23,11 @@ public class UserController {
         log.setLevel(Level.TRACE);
     }
 
-    @GetMapping
+    @GetMapping("/users/{id}")
     public Collection<User> findAll(@RequestParam("id") Optional<String> id) {
         log.trace("Вывести список пользователей");
         if (id.isPresent()) {
-            String message = "Нельзя получить пользователя по id";
+            String message = "Некорректный вызов получения списка пользователей";
             log.error(message);
             throw new ValidationException(message);
         }
