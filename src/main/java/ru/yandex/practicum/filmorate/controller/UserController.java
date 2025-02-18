@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -27,8 +24,13 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll() {
+    public Collection<User> findAll(@RequestParam("id") Optional<String> id) {
         log.trace("Вывести список пользователей");
+        if (id.isPresent()) {
+            String message = "Нельзя получить пользователя по id";
+            log.error(message);
+            throw new ValidationException(message);
+        }
         return users.values();
     }
 
