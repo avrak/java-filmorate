@@ -103,7 +103,7 @@ public class UserController {
         }
 
         if (user.getLogin().contains(" ")) {
-            String loginSpacesWarning = "Логин пользователя не должен содержать пробелы: '" + user.getLogin() + "'";
+            String loginSpacesWarning = "Логин пользователя не должен содержать пробелы";
             log.warn(loginSpacesWarning);
             throw new ValidationException(loginSpacesWarning);
         }
@@ -117,13 +117,13 @@ public class UserController {
         }
 
         if (new ArrayList<>(users.values()).stream().anyMatch(userInList -> userInList.getEmail().equals(user.getEmail()))) {
-            String duplicateEmailWarning = "Этот имейл уже используется: '" + user.getEmail() + "'";
+            String duplicateEmailWarning = "Этот имейл уже используется";
             log.warn(duplicateEmailWarning);
             throw new ValidationException(duplicateEmailWarning);
         }
 
         if (!user.getEmail().contains("@")) {
-            String incorrectEmailWarning = "Некорректный имейл: '" + user.getEmail() + "'";
+            String incorrectEmailWarning = "Некорректный имейл";
             log.warn(incorrectEmailWarning);
             throw new ValidationException(incorrectEmailWarning);
         }
@@ -131,7 +131,7 @@ public class UserController {
 
     private void checkUserBirthday(User user) {
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            String incorrectBirthdayWarning = "День рождения пользователя не может быть в будущем: '" + user.getBirthday() + "'";
+            String incorrectBirthdayWarning = "День рождения пользователя не может быть в будущем";
             log.warn(incorrectBirthdayWarning);
             throw new ValidationException(incorrectBirthdayWarning);
         }
