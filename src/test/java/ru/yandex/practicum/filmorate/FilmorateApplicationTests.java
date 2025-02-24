@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 class FilmorateApplicationTests {
@@ -46,8 +45,7 @@ class FilmorateApplicationTests {
 	public void addNewUserCheck() {
 		userController.create(user);
 
-        assertFalse(userController.findAll().stream().noneMatch(user -> user.getLogin().equals("avrak"))
-			, "Пользователь не был добавлен");
+        assertFalse(userController.findAll().stream().noneMatch(user -> user.getLogin().equals("avrak")), "Пользователь не был добавлен");
 	}
 
 	@Test
@@ -58,8 +56,7 @@ class FilmorateApplicationTests {
 
 		userController.update(newUser);
 
-		assertFalse(userController.findAll().stream().noneMatch(user -> user.getName().equals("Alexander"))
-				, "Пользователь не был обновлен");
+		assertFalse(userController.findAll().stream().noneMatch(user -> user.getName().equals("Alexander")), "Пользователь не был обновлен");
 	}
 
 	@Test
@@ -130,8 +127,7 @@ class FilmorateApplicationTests {
 		Film newFilm = filmController.create(film);
 		newFilm.setDescription("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино");
 
-		assertFalse(filmController.findAll().stream()
-				.noneMatch(film -> film.getDescription().equals("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино"))
+		assertFalse(filmController.findAll().stream().noneMatch(film -> film.getDescription().equals("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино"))
 		,"Фильм не был обновлен");
 	}
 
