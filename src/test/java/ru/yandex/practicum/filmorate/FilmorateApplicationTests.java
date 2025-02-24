@@ -118,8 +118,7 @@ class FilmorateApplicationTests {
 	public void checkAddFilm() {
 		filmController.create(film);
 
-		assertFalse(filmController.findAll().stream().noneMatch(film -> film.getName().equals("Pulp Fiction"))
-			, "Фильм не был добавлен");
+		assertFalse(filmController.findAll().stream().noneMatch(film -> film.getName().equals("Pulp Fiction")), "Фильм не был добавлен");
 	}
 
 	@Test
@@ -127,8 +126,7 @@ class FilmorateApplicationTests {
 		Film newFilm = filmController.create(film);
 		newFilm.setDescription("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино");
 
-		assertFalse(filmController.findAll().stream().noneMatch(film -> film.getDescription().equals("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино"))
-		,"Фильм не был обновлен");
+		assertFalse(filmController.findAll().stream().noneMatch(film -> film.getDescription().equals("Сюжет фильма построен нелинейно, как и в большинстве других работ Тарантино")),"Фильм не был обновлен");
 	}
 
 	@Test
