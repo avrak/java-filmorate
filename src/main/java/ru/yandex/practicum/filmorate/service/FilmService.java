@@ -155,7 +155,17 @@ public class FilmService implements FilmStorage {
     public Collection<Film> getPopularFilms(Long count) {
         return new ArrayList<>(films.values())
                 .stream()
-                .sorted((Film f1, Film f2) -> -1 * (f1.getLikes().size() - f2.getLikes().size()))
+                .sorted((Film f1, Film f2) -> {
+                    int size1 = 0;
+
+                    if (!f1.getLikes().isEmpty()) size1 = f1.getLikes().size();
+
+                    int size2 = 0;
+
+                    if (!f2.getLikes().isEmpty()) size2 = f2.getLikes().size();
+
+                    return -1 * (size1 - size2);
+                })
                 .limit(count)
                 .collect(Collectors.toList());
     }
