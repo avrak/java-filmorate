@@ -158,11 +158,11 @@ public class FilmService implements FilmStorage {
                 .sorted((Film f1, Film f2) -> {
                     int size1 = 0;
 
-                    if (!f1.getLikes().isEmpty()) size1 = f1.getLikes().size();
+                    if (f1.getLikes() != null) size1 = f1.getLikes().size();
 
                     int size2 = 0;
 
-                    if (!f2.getLikes().isEmpty()) size2 = f2.getLikes().size();
+                    if (f2.getLikes() != null) size2 = f2.getLikes().size();
 
                     return -1 * (size1 - size2);
                 })
