@@ -121,9 +121,9 @@ public class FilmService implements FilmStorage {
     }
 
     public void validateFilmReleaseDate(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(InMemoryFilmStorage.EARLIEST_FILM_YEAR
-                , InMemoryFilmStorage.EARLIEST_FILM_MONTH
-                , InMemoryFilmStorage.EARLIEST_FILM_DAY))) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(InMemoryFilmStorage.EARLIEST_FILM_YEAR,
+                InMemoryFilmStorage.EARLIEST_FILM_MONTH,
+                InMemoryFilmStorage.EARLIEST_FILM_DAY))) {
             throw new ParameterNotValidException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
     }
@@ -133,19 +133,13 @@ public class FilmService implements FilmStorage {
     }
 
     public void setLikeByUserId(Long filmId, Long userId) {
-        try {
-            Film film = films.get(filmId);
+        Film film = films.get(filmId);
 
-            if (film == null) throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        if (film == null) throw new NotFoundException("Фильм с id = " + filmId + " не найден");
 
-            if (users.get(userId) == null) throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
+        if (users.get(userId) == null) throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
 
-            film.getLikes().add(userId);
-        }
-        catch (Exception e) {
-            String exp = e.getMessage();
-            throw e;
-        }
+        film.getLikes().add(userId);
     }
 
     public void deleteLikeByUserId(Long filmId, Long userId) {
