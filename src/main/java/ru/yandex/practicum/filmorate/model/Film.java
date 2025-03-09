@@ -21,7 +21,7 @@ public class Film {
     private Long id;
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
-    @Size(min=1, max = 200, message = "Описание должно быть не более 200 символов")
+    @Size(min = 1, max = 200, message = "Описание должно быть не более 200 символов")
     private String description;
     @NotEarliest
     private LocalDate releaseDate;
