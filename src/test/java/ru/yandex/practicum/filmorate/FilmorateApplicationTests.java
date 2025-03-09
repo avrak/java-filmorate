@@ -197,8 +197,7 @@ class FilmorateApplicationTests {
 				&& userController
 						.getUserById(userController.getUserById(friend.getId()).getId())
 						.getFriends()
-						.contains(user.getId())
-				,
+						.contains(user.getId()),
 				"Друзья не найдены");
 	}
 
