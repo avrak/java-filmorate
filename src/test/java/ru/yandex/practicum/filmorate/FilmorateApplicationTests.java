@@ -6,9 +6,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
 import java.time.LocalDate;
 
 @SpringBootTest
@@ -24,7 +30,9 @@ class FilmorateApplicationTests {
 
 	@BeforeEach
 	public void setEntities() {
-		userController = new UserController();
+		InMemoryStorage inMemoryStorage = new InMemoryStorage(new InMemoryUserStorage(), new InMemoryFilmStorage());
+
+		userController = new UserController(new UserService(inMemoryStorage));
 
 		user = new User();
 		user.setLogin("avrak");
@@ -32,7 +40,7 @@ class FilmorateApplicationTests {
 		user.setEmail("avrak@yandex.ru");
 		user.setBirthday(LocalDate.of(1972,2,10));
 
-		filmController = new FilmController();
+		filmController = new FilmController(new FilmService(inMemoryStorage));
 
 		film = new Film();
 		film.setName("Pulp Fiction");
@@ -62,33 +70,33 @@ class FilmorateApplicationTests {
 	@Test
 	public void checkEmptyLogin() {
 		user.setLogin("");
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(user));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(user));
 
-		assertEquals("Логин пользователя не может быть пустым", thrown.getMessage());
+		assertEquals("Логин пользователя не может быть пустым", thrown.getReason());
 	}
 
 	@Test
 	public void checkWrongLogin() {
 		user.setLogin("av rak");
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(user));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(user));
 
-		assertEquals("Логин пользователя не должен содержать пробелы", thrown.getMessage());
+		assertEquals("Логин пользователя не должен содержать пробелы", thrown.getReason());
 	}
 
 	@Test
 	public void checkEmptyEmail() {
 		user.setEmail("");
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(user));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(user));
 
-		assertEquals("Имейл должен быть указан", thrown.getMessage());
+		assertEquals("Имейл должен быть указан", thrown.getReason());
 	}
 
 	@Test
 	public void checkWrongEmail() {
 		user.setEmail("avrak");
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(user));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(user));
 
-		assertEquals("Некорректный имейл", thrown.getMessage());
+		assertEquals("Некорректный имейл", thrown.getReason());
 	}
 
 	@Test
@@ -101,17 +109,17 @@ class FilmorateApplicationTests {
 		newUser.setEmail("avrak@yandex.ru");
 		newUser.setBirthday(LocalDate.of(1924,6,29));
 
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(newUser));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(newUser));
 
-		assertEquals("Этот имейл уже используется", thrown.getMessage());
+		assertEquals("Этот имейл уже используется", thrown.getReason());
 	}
 
 	@Test
 	public void checkWrongBirthday() {
 		user.setBirthday(LocalDate.of(2972,2,10));
-		ValidationException thrown = assertThrows(ValidationException.class, () -> userController.create(user));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> userController.create(user));
 
-		assertEquals("День рождения пользователя не может быть в будущем", thrown.getMessage());
+		assertEquals("День рождения пользователя не может быть в будущем", thrown.getReason());
 	}
 
 	@Test
@@ -133,9 +141,9 @@ class FilmorateApplicationTests {
 	public void checkEmptyName() {
 		film.setName("");
 
-		ValidationException thrown = assertThrows(ValidationException.class, () -> filmController.create(film));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> filmController.create(film));
 
-		assertEquals("Название фильма не может быть пустым", thrown.getMessage());
+		assertEquals("Название фильма не может быть пустым", thrown.getReason());
 	}
 
 	@Test
@@ -144,26 +152,62 @@ class FilmorateApplicationTests {
 			film.setDescription(film.getDescription() + ".");
 		}
 
-		ValidationException thrown = assertThrows(ValidationException.class, () -> filmController.create(film));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> filmController.create(film));
 
-		assertEquals("Описание должно быть не более 200 символов", thrown.getMessage());
+		assertEquals("Описание должно быть не более 200 символов", thrown.getReason());
 	}
 
 	@Test
 	public void checkWrongDuration() {
 		film.setDuration(-1);
 
-		ValidationException thrown = assertThrows(ValidationException.class, () -> filmController.create(film));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> filmController.create(film));
 
-		assertEquals("Продолжительность фильма должна быть положительным числом", thrown.getMessage());
+		assertEquals("Продолжительность фильма должна быть положительным числом", thrown.getReason());
 	}
 
 	@Test
 	public void checkReleaseDate() {
 		film.setReleaseDate(LocalDate.of(1794, 5, 21));
 
-		ValidationException thrown = assertThrows(ValidationException.class, () -> filmController.create(film));
+		ParameterNotValidException thrown = assertThrows(ParameterNotValidException.class, () -> filmController.create(film));
 
-		assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года", thrown.getMessage());
+		assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года", thrown.getReason());
+	}
+
+	@Test
+	public void checkAddUserFriend() {
+
+		userController.create(user);
+
+		User friend = new User();
+		friend.setLogin("vgrak");
+		friend.setName("Vlad");
+		friend.setEmail("vgrak@yandex.ru");
+		friend.setBirthday(LocalDate.of(1924,7,29));
+
+		userController.create(friend);
+
+		userController.addFriend(user.getId(), friend.getId());
+
+		assertTrue(userController
+				.getUserById(user.getId())
+				.getFriends()
+				.contains(userController.getUserById(friend.getId()).getId())
+				&& userController
+						.getUserById(userController.getUserById(friend.getId()).getId())
+						.getFriends()
+						.contains(user.getId())
+				,
+				"Друзья не найдены");
+	}
+
+	@Test
+	public void checkLikes() {
+		filmController.create(film);
+		userController.create(user);
+		filmController.getFilmById(film.getId()).getLikes().add(user.getId());
+
+		assertTrue(filmController.getFilmById(film.getId()).getLikes().contains(user.getId()), "Лайк не найден");
 	}
 }
