@@ -1,17 +1,13 @@
 package ru.yandex.practicum.filmorate;
 
-import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Set;
-
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -22,7 +18,7 @@ class FilmorateApplicationTests {
 	private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 	@Test
-	public void checkUser(){
+	public void checkUser() {
 		User user = new User();
 
 		user.setEmail("xxx");
@@ -39,7 +35,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	void checkFilm(){
+	void checkFilm() {
 		Film film = new Film();
 
 		film.setName("");
