@@ -17,13 +17,12 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Getter
-//    private final InMemoryUserStorage getUserStorage();
     private final InMemoryStorage inMemoryStorage;
 
     public InMemoryUserStorage getUserStorage() {
         return inMemoryStorage.getUserStorage();
     }
-    
+
     public Map<Long, User> getUsers() {
         return inMemoryStorage.getUserStorage().getAll();
     }
