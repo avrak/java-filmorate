@@ -23,7 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Map<Long, Film> getAll() {
         return films;
-    };
+    }
 
     @Override
     public Film create(Film film) {
