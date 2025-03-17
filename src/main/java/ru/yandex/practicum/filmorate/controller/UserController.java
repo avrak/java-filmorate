@@ -1,139 +1,78 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.model.User;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.*;
 
+@Validated
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(UserController.class);
 
-    private final Map<Long, User> users = new HashMap<>();
-
-    public UserController() {
-        log.setLevel(Level.TRACE);
-    }
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
         log.trace("Вывести список пользователей");
-        return users.values();
+        return  userService.getUserStorage().getAll().values();
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable(value = "userId") Long userId) {
+        return userService.getUserById(userId);
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(@RequestBody @Valid User user) {
         log.trace("Создать пользователя");
 
-        checkUserLogin(user);
-
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-
-        checkUserEmail(user);
-        checkUserBirthday(user);
-
-        user.setId(getNextId());
-
-        users.put(user.getId(), user);
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public User update(@RequestBody @Valid User newUser) {
         log.trace("Обновить пользователя");
 
-        if (newUser.getId() == null) {
-            String idWarning = "Id должен быть указан";
-            log.warn(idWarning);
-            throw new ValidationException(idWarning);
-        }
-        if (users.containsKey(newUser.getId())) {
-            User oldUser = users.get(newUser.getId());
-
-            if (newUser.getLogin() != null) {
-                checkUserLogin(newUser);
-                oldUser.setLogin(newUser.getLogin());
-            }
-            if (newUser.getName() != null) {
-                oldUser.setName(newUser.getName());
-            }
-            if (newUser.getEmail() != null) {
-                log.trace("newUser.getEmail(): " + newUser.getEmail() + "; " + "oldUser.getEmail(): " + oldUser.getEmail());
-                if (!newUser.getEmail().equals(oldUser.getEmail())) {
-                    checkUserEmail(newUser);
-                }
-                oldUser.setEmail(newUser.getEmail());
-            }
-            if (newUser.getBirthday() != null) {
-                checkUserBirthday(newUser);
-                oldUser.setBirthday(newUser.getBirthday());
-            }
-            users.put(oldUser.getId(), oldUser);
-            return oldUser;
-        }
-        String userNotFound = "Пользователь с id = " + newUser.getId() + " не найден";
-        log.warn(userNotFound);
-        throw new NotFoundException(userNotFound);
+        return userService.update(newUser);
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(
+            @PathVariable("id") Long userId,
+            @PathVariable("friendId") Long friendId
+    ) {
+        userService.addFriend(userId, friendId);
     }
 
-    private void checkUserLogin(User user) {
-        if (user.getLogin() == null || user.getLogin().isEmpty()) {
-            String loginEmptyWarning = "Логин пользователя не может быть пустым";
-            log.warn(loginEmptyWarning);
-            throw new ValidationException(loginEmptyWarning);
-        }
-
-        if (user.getLogin().contains(" ")) {
-            String loginSpacesWarning = "Логин пользователя не должен содержать пробелы";
-            log.warn(loginSpacesWarning);
-            throw new ValidationException(loginSpacesWarning);
-        }
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(
+            @PathVariable("id") Long userId,
+            @PathVariable("friendId") Long friendId
+    ) {
+        userService.deleteFriend(userId, friendId);
+        userService.deleteFriend(friendId, userId);
     }
 
-    private void checkUserEmail(User user) {
-        if (user.getEmail().isEmpty()) {
-            String noEmailWarning = "Имейл должен быть указан";
-            log.warn(noEmailWarning);
-            throw new ValidationException(noEmailWarning);
-        }
-
-        if (new ArrayList<>(users.values()).stream().anyMatch(userInList -> userInList.getEmail().equals(user.getEmail()))) {
-            String duplicateEmailWarning = "Этот имейл уже используется";
-            log.warn(duplicateEmailWarning);
-            throw new ValidationException(duplicateEmailWarning);
-        }
-
-        if (!user.getEmail().contains("@")) {
-            String incorrectEmailWarning = "Некорректный имейл";
-            log.warn(incorrectEmailWarning);
-            throw new ValidationException(incorrectEmailWarning);
-        }
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable("id") Long userId) {
+        return userService.getFriends(userId);
     }
 
-    private void checkUserBirthday(User user) {
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            String incorrectBirthdayWarning = "День рождения пользователя не может быть в будущем";
-            log.warn(incorrectBirthdayWarning);
-            throw new ValidationException(incorrectBirthdayWarning);
-        }
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(
+            @PathVariable("id") Long firstUserId,
+            @PathVariable("otherId") Long secondUserId
+    ) {
+        return userService.getCommonFriends(firstUserId, secondUserId);
     }
 }
