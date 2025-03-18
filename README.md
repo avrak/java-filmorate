@@ -3,7 +3,6 @@
 ## Схема БД
 
 ```plantuml
-@startuml
 !define table(name, desc) class name as "desc" << (T, white) >>
 
 !define pk(x, t) <b><color:#red><&key></color> x :</b> <i>t</i>
@@ -83,5 +82,4 @@ friends::user2 }o..|| users::id
 
 films::id ||..o{ likes::film_id
 users::id ||..o{ likes::user_id
-@enduml
 ```
