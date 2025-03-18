@@ -67,6 +67,10 @@ table(films, "films") {
     nn(release_date, date) 
     ----
     nn(duration, int)
+    ----
+    fk(genre_id, int)
+    ----
+    fk(rating_id, int)
 }
 
 table(likes, "likes") {
@@ -78,6 +82,18 @@ table(likes, "likes") {
     <color:blue>unique index likes_ui01(film_id, user_id)</color>
 }
 
+table(genre, "genre") {
+    pk(id, int)
+    ----
+    nn(name, varchar[50])
+}
+
+table(rating, "rating") {
+    pk(id, int)
+    ----
+    nn(code, varchar[10])
+}
+
 requests::requester_id }o..|| users::id
 requests::replier_id }o..|| users::id
 
@@ -86,6 +102,10 @@ friends::user2 }o..|| users::id
 
 films::id ||..o{ likes::film_id
 users::id ||..o{ likes::user_id
+
+films::genre_id }.r.|| genre::id
+films::rating_id }..|| rating::id
+
 ```
 
 </details>
