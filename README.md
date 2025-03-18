@@ -45,7 +45,7 @@ table(requests, "friend_requests") {
     fk(replier_id, int8)
     ----
     ----
-    <color:blue>unique index requests_ui01 (requester_id, replier_id)</color>
+    <color:blue>unique index friend_requests_ui01 (requester_id, replier_id)</color>
 }
 
 table(friends, "confirmed_friends") {
@@ -54,7 +54,7 @@ table(friends, "confirmed_friends") {
     fk(user2, int8)
     ----
     ----
-    <color:blue>unique index requests_ui01 (user1, user2)</color>
+    <color:blue>unique index confirmed_friends_ui01 (user1, user2)</color>
 }
 
 table(films, "films") {
