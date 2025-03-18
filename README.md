@@ -2,6 +2,10 @@
 
 ## Схема БД
 
+![db-schema](db-schema.png)
+
+<details><summary>код схемы в plantuml</summary>
+
 ```plantuml
 !define table(name, desc) class name as "desc" << (T, white) >>
 
@@ -83,3 +87,5 @@ friends::user2 }o..|| users::id
 films::id ||..o{ likes::film_id
 users::id ||..o{ likes::user_id
 ```
+
+</details>
