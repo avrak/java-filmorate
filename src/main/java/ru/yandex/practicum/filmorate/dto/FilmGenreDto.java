@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class FilmGenreDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long FilmId;
-    private Integer GenreId;
+    private Long filmId;
+    private Integer genreId;
 }
