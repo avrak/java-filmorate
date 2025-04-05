@@ -24,7 +24,7 @@ public class UserController {
     @GetMapping
     public Collection<User> findAll() {
         log.trace("Вывести список пользователей");
-        return  userService.getUserStorage().getAll().values();
+        return  userService.findAll();
     }
 
     @GetMapping("/{userId}")
@@ -51,6 +51,7 @@ public class UserController {
             @PathVariable("id") Long userId,
             @PathVariable("friendId") Long friendId
     ) {
+        log.trace("Создать друзей из " + userId + " и " + friendId);
         userService.addFriend(userId, friendId);
     }
 
@@ -60,7 +61,6 @@ public class UserController {
             @PathVariable("friendId") Long friendId
     ) {
         userService.deleteFriend(userId, friendId);
-        userService.deleteFriend(friendId, userId);
     }
 
     @GetMapping("/{id}/friends")
