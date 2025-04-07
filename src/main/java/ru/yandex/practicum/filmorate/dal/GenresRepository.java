@@ -15,6 +15,7 @@ public class GenresRepository extends BaseRepository<Genre> {
     private static final String FIND_BY_ID_QUERY = "SELECT id, name FROM genres WHERE id = ?";
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT DISTINCT id, name "
         + "FROM film_genres FG JOIN genres g ON g.id = fg.genre_id WHERE fg.film_id = ?";
+    private static final String FIND_BY_LIST_ID = "SELECT id, name FROM genres WHERE id IN ";
     private static final String INSERT_QUERY = "INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?)";
     private static final String DELETE_BY_FILMD_ID_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
 
@@ -32,6 +33,11 @@ public class GenresRepository extends BaseRepository<Genre> {
 
     public List<Genre> findByFilmId(long filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public List<Genre> findByListId(String genresIdListRow) {
+        String query = FIND_BY_LIST_ID + "(" + genresIdListRow + ")";
+        return findMany(query);
     }
 
     public void saveFilmGenre(long filmId, long genreId) {

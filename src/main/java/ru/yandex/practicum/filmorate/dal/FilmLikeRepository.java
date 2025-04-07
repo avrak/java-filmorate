@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public class FilmLikeRepository extends BaseRepository<FilmLike> {
     private static final String GET_LIKES_BY_FILM_ID = "SELECT user_id FROM likes WHERE film_id = ?";
+    private static final String GET_ALL_FILM_LIKES = "SELECT film_id, user_id FROM likes";
     private static final String INSERT_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
     private static final String DELETE_BY_FILMID_USERID_QUERY = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
     private static final String DELETE_QUERY = "DELETE FROM likes WHERE film_id = ?";

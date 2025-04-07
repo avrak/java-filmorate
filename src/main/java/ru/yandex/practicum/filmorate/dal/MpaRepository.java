@@ -24,5 +24,4 @@ public class MpaRepository extends BaseRepository<Mpa> {
     public Collection<Mpa> findAll() {
         return findMany(FIND_ALL_QUERY);
     }
-
 }

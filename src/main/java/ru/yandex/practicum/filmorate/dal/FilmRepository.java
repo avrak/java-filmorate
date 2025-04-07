@@ -2,12 +2,8 @@ package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.dal.mappers.FilmLikeRowMapper;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmLike;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.dal.mappers.*;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.*;
 
@@ -15,6 +11,8 @@ import java.util.*;
 public class FilmRepository extends BaseRepository<Film> {
     private static FilmLikeRepository filmLikeRepository;
     private static GenresRepository genresRepository;
+    private static LikeRepository likesRepository;
+    private static FilmGenreRepository filmGenreRepository;
 
     private static final String FIND_ALL_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id, m.code as mpa_code "
             + "FROM films f JOIN mpa m on m.id = f.mpa_id";
@@ -36,6 +34,8 @@ public class FilmRepository extends BaseRepository<Film> {
         super(jdbc, mapper);
         filmLikeRepository = new FilmLikeRepository(jdbc, new FilmLikeRowMapper());
         genresRepository = new GenresRepository(jdbc, new GenreRowMapper());
+        likesRepository = new LikeRepository(jdbc, new LikeRowMapper());
+        filmGenreRepository = new FilmGenreRepository(jdbc, new FilmGenreRowMapper());
     }
 
     private Set<FilmLike> getFilmLikes(Long filmId) {
@@ -46,12 +46,45 @@ public class FilmRepository extends BaseRepository<Film> {
         return new HashSet<>(genresRepository.findByFilmId(filmId));
     }
 
+    private Map<Long, Set<FilmLike>> getAllLikes(List<Like> likeList) {
+        Map<Long, Set<FilmLike>> likes = new HashMap<>();
+
+        for (Like like : likeList) {
+            likes.computeIfAbsent(like.getFilmId(), k -> new HashSet<>());
+
+            Set<FilmLike> filmLikeSet = likes.get(like.getFilmId());
+            FilmLike filmLike = new FilmLike();
+            filmLike.setUserId(like.getUserId());
+            filmLikeSet.add(filmLike);
+        }
+
+        return likes;
+    }
+
+    private Map<Long, Set<Genre>> getAllGenres(List<FilmGenre> genreList) {
+        Map<Long, Set<Genre>> genres = new HashMap<>();
+
+        for (FilmGenre genre : genreList) {
+            genres.computeIfAbsent(genre.getFilmId(), k -> new HashSet<>());
+
+            Set<Genre> genreSet = genres.get(genre.getFilmId());
+            Genre filmGenre = new Genre();
+            filmGenre.setId(genre.getGenreId());
+            filmGenre.setName(genre.getName());
+        }
+
+        return genres;
+    }
+
     public List<Film> findAll() {
         List<Film> filmList = findMany(FIND_ALL_QUERY);
 
+        List<Like> likeList = likesRepository.getAll();
+        List<FilmGenre> genreList = filmGenreRepository.getAll();
+
         filmList.forEach(film -> {
-            film.setLikes(getFilmLikes(film.getId()));
-            film.setGenres(getFilmGenres(film.getId()));
+            film.setLikes(getAllLikes(likeList).get(film.getId()));
+            film.setGenres(getAllGenres(genreList).get(film.getId()));
         }
         );
 

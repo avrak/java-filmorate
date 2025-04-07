@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -15,19 +16,19 @@ import java.util.*;
 @RestController
 @RequestMapping("/genres")
 @RequiredArgsConstructor
+@Slf4j
 public class GenresController {
-    private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(GenresController.class);
-
     private final GenresService genresService;
 
     @GetMapping
     public Collection<Genre> findAll() {
-        log.trace("Вывести список жанров");
+        log.info("Вывести список жанров");
         return genresService.findAll();
     }
 
     @GetMapping("/{genreId}")
     public Genre getGenreById(@PathVariable(value = "genreId") Long genreId) {
+        log.info("Получить жанр по id= {}", genreId);
         return genresService.getGenreById(genreId);
     }
 }

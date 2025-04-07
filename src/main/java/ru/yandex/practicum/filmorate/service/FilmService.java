@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,28 +20,44 @@ public class FilmService  {
     private final FilmLikeRepository filmLikeRepository;
     private final GenresRepository genresRepository;
 
-    public Map<Long, Film> getFilms() {
-        Map<Long, Film> films = new HashMap<>();
-        for (Film film : filmRepository.findAll()) {
-            films.put(film.getId(), film);
-        }
-        return films;
+    public List<Film> getFilms() {
+        return filmRepository.findAll();
     }
 
     public Film getFilmById(Long filmId) {
         Optional<Film> film = filmRepository.findById(filmId);
-        if (film.isEmpty()) throw new NotFoundException("Фильм с id " + filmId + " не найден.");
+        if (film.isEmpty()) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден.");
+        }
 
         return film.get();
     }
 
     public Film create(Film film) {
-        if (mpaRepository.findById(film.getMpa().getId()).isEmpty()) throw new NotFoundException("Рейтинг с id " + film.getMpa().getId() + " не найден.");
+        if (mpaRepository.findById(film.getMpa().getId()).isEmpty()) {
+            throw new NotFoundException("Рейтинг с id " + film.getMpa().getId() + " не найден.");
+        }
 
-        if (film.getGenres() != null && !film.getGenres().isEmpty())
-            for (Genre genre : film.getGenres())
-                if (genresRepository.findById(genre.getId()).isEmpty())
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            StringBuilder genresIdListRow = new StringBuilder();
+
+            for (Genre genre : film.getGenres()) {
+                if (!genresIdListRow.isEmpty()) {
+                    genresIdListRow.append(",");
+                }
+                genresIdListRow.append(genre.getId());
+            }
+
+            Map<Integer, Genre> existingGenresId = new HashMap<>();
+            genresRepository.findByListId(genresIdListRow.toString())
+                    .forEach(genre -> existingGenresId.put(genre.getId(), genre));
+
+            for (Genre genre : film.getGenres()) {
+                if (existingGenresId.get(genre.getId()) == null) {
                     throw new NotFoundException("Жанр с id " + genre.getId() + " не найден.");
+                }
+            }
+        }
 
         return filmRepository.save(film);
     }
@@ -53,8 +66,6 @@ public class FilmService  {
         if (newFilm.getId() == null) {
             throw new ParameterNotValidException("Id должен быть указан");
         }
-
-        if (!getFilms().containsKey(newFilm.getId()))  throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
 
         Film oldFilm = getFilmById(newFilm.getId());
 
@@ -79,18 +90,26 @@ public class FilmService  {
     }
 
     public void setLikeByUserId(Long filmId, Long userId) {
-        if (getFilmById(filmId) == null) throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        if (getFilmById(filmId) == null) {
+            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        }
 
-        if (userRepository.findById(userId).isEmpty()) throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
+        }
 
         filmLikeRepository.save(filmId, userId);
     }
 
     public void deleteLikeByUserId(Long filmId, Long userId) {
 
-        if (getFilmById(filmId) == null) throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        if (getFilmById(filmId) == null) {
+            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        }
 
-        if (userRepository.findById(userId).isEmpty()) throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь с id = " + filmId + " не найден");
+        }
 
         filmLikeRepository.deleteByFilmIdUserId(filmId, userId);
     }

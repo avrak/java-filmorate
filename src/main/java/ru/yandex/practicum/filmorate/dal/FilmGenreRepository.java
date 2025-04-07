@@ -9,7 +9,10 @@ import java.util.List;
 
 @Repository
 public class FilmGenreRepository extends BaseRepository<FilmGenre> {
-    private static final String FIND_BY_FILM_ID_QUERY = "SELECT film_id, genre_id FROM film_genres WHERE film_id = ?";
+    private static final String FIND_BY_FILM_ID_QUERY = "SELECT f.film_id, f.genre_id, g.name "
+        + "FROM film_genres f JOIN genres g ON g.id = f.genre_id WHERE film_id = ?";
+    private static final String FIND_ALL_QUERY = "SELECT f.film_id, f.genre_id, g.name "
+            + "FROM film_genres f JOIN genres g ON g.id = f.genre_id";
     private static final String INSERT_QUERY = "INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?)";
     private static final String DELETE_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
 
@@ -21,11 +24,15 @@ public class FilmGenreRepository extends BaseRepository<FilmGenre> {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 
-    public void save(FilmGenre filmGenre) {
+    public List<FilmGenre> getAll() {
+        return findMany(FIND_ALL_QUERY);
+    }
+
+    public void save(long filmId, int genreId) {
         insertNoKey(
                 INSERT_QUERY,
-                filmGenre.getFilmId(),
-                filmGenre.getGenreId()
+                filmId,
+                genreId
         );
     }
 

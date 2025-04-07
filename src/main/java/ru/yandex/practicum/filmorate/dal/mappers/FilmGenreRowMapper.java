@@ -14,6 +14,7 @@ public class FilmGenreRowMapper implements RowMapper<FilmGenre> {
         FilmGenre filmGenre = new FilmGenre();
         filmGenre.setFilmId(resultSet.getLong("film_id"));
         filmGenre.setGenreId(resultSet.getInt("genre_id"));
+        filmGenre.setName(resultSet.getString("name"));
 
         return filmGenre;
     }

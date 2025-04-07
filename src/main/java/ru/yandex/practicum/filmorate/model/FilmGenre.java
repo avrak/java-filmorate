@@ -16,4 +16,5 @@ public class FilmGenre {
     private Long filmId;
     @NotBlank(message = "Жанр должен быть указан")
     private Integer genreId;
+    private String name;
 }

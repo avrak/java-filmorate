@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -14,16 +15,15 @@ import java.util.*;
 
 @Validated
 @RestController
+@Slf4j
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(UserController.class);
-
     private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        log.trace("Вывести список пользователей");
+        log.info("Вывести список пользователей");
         return  userService.findAll();
     }
 
@@ -34,14 +34,14 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody @Valid User user) {
-        log.trace("Создать пользователя");
+        log.info("Создать пользователя");
 
         return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody @Valid User newUser) {
-        log.trace("Обновить пользователя");
+        log.info("Обновить пользователя");
 
         return userService.update(newUser);
     }
@@ -51,7 +51,7 @@ public class UserController {
             @PathVariable("id") Long userId,
             @PathVariable("friendId") Long friendId
     ) {
-        log.trace("Создать друзей из " + userId + " и " + friendId);
+        log.info("Создать друзей из " + userId + " и " + friendId);
         userService.addFriend(userId, friendId);
     }
 

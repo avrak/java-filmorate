@@ -8,7 +8,10 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-public class FilmLike {
+public class Like {
+    @NotBlank(message = "Фильм должен быть указан")
+    private Long filmId;
     @NotBlank(message = "Пользователь должен быть указан")
     private Long userId;
 }
+

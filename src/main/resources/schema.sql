@@ -3,7 +3,8 @@ create table if not exists users(
     email varchar(100) not null,
     login varchar(50) not null,
     name varchar(50),
-    birthday date not null
+    birthday date not null,
+    unique(email)
 );
 
 create table if not exists friends(
