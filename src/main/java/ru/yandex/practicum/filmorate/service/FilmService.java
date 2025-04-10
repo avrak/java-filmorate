@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 
 import java.util.*;
@@ -19,8 +18,60 @@ public class FilmService  {
     private final MpaRepository mpaRepository;
     private final FilmLikeRepository filmLikeRepository;
     private final GenresRepository genresRepository;
+    private final LikeRepository likesRepository;
+    private final FilmGenreRepository filmGenreRepository;
+
+    private Set<FilmLike> getFilmLikes(Long filmId) {
+        return new HashSet<>(filmLikeRepository.findByFilmId(filmId));
+    }
+
+    private Set<Genre> getFilmGenres(Long filmId) {
+        return new HashSet<>(genresRepository.findByFilmId(filmId));
+    }
+
+    private Map<Long, Set<FilmLike>> getAllLikes(List<Like> likeList) {
+        Map<Long, Set<FilmLike>> likes = new HashMap<>();
+
+        for (Like like : likeList) {
+            likes.computeIfAbsent(like.getFilmId(), k -> new HashSet<>());
+
+            Set<FilmLike> filmLikeSet = likes.get(like.getFilmId());
+            FilmLike filmLike = new FilmLike();
+            filmLike.setUserId(like.getUserId());
+            filmLikeSet.add(filmLike);
+        }
+
+        return likes;
+    }
+
+    private Map<Long, Set<Genre>> getAllGenres(List<FilmGenre> genreList) {
+        Map<Long, Set<Genre>> genres = new HashMap<>();
+
+        for (FilmGenre genre : genreList) {
+            genres.computeIfAbsent(genre.getFilmId(), k -> new HashSet<>());
+
+            Set<Genre> genreSet = genres.get(genre.getFilmId());
+            Genre filmGenre = new Genre();
+            filmGenre.setId(genre.getGenreId());
+            filmGenre.setName(genre.getName());
+            genreSet.add(filmGenre);
+        }
+
+        return genres;
+    }
+
 
     public List<Film> getFilms() {
+        List<Like> likeList = likesRepository.getAll();
+        List<FilmGenre> genreList = filmGenreRepository.getAll();
+        List<Film> filmList = filmRepository.findAll();
+
+        filmList.forEach(film -> {
+                    film.setLikes(getAllLikes(likeList).get(film.getId()));
+                    film.setGenres(getAllGenres(genreList).get(film.getId()));
+                }
+        );
+
         return filmRepository.findAll();
     }
 
@@ -30,7 +81,32 @@ public class FilmService  {
             throw new NotFoundException("Фильм с id " + filmId + " не найден.");
         }
 
-        return film.get();
+        Film filmById = film.get();
+
+        filmById.setLikes(getFilmLikes(filmId));
+        filmById.setGenres(getFilmGenres(filmId));
+
+        return filmById;
+    }
+
+    private void saveFilmLikes(Film film) {
+        if (film.getLikes() == null || film.getLikes().isEmpty()) return;
+
+        filmLikeRepository.deleteByFilmId(film.getId());
+
+        for (FilmLike filmLike : film.getLikes()) {
+            filmLikeRepository.save(film.getId(), filmLike.getUserId());
+        }
+    }
+
+    private void saveFilmGenres(Film film) {
+        if (film.getGenres() == null || film.getGenres().isEmpty()) return;
+
+        genresRepository.deleteByFilmId(film.getId());
+
+        for (Genre genre : film.getGenres()) {
+            genresRepository.saveFilmGenre(film.getId(), genre.getId());
+        }
     }
 
     public Film create(Film film) {
@@ -59,7 +135,12 @@ public class FilmService  {
             }
         }
 
-        return filmRepository.save(film);
+        Film newFilm = filmRepository.save(film);
+
+        saveFilmLikes(newFilm);
+        saveFilmGenres(newFilm);
+
+        return newFilm;
     }
 
     public Film update(Film newFilm) {
@@ -86,6 +167,10 @@ public class FilmService  {
         }
 
         filmRepository.update(oldFilm);
+        saveFilmLikes(oldFilm);
+        saveFilmGenres(oldFilm);
+
+
         return oldFilm;
     }
 
@@ -115,6 +200,14 @@ public class FilmService  {
     }
 
     public Collection<Film> getPopularFilms(Long count) {
-        return filmRepository.getPopularFilms(count);
+        Collection<Film> filmCollection = filmRepository.getPopularFilms(count);
+
+        filmCollection.forEach(film -> {
+                    film.setLikes(getFilmLikes(film.getId()));
+                    film.setGenres(getFilmGenres(film.getId()));
+                }
+        );
+
+        return filmCollection;
     }
 }
