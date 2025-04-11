@@ -48,13 +48,13 @@ table(requests, "friend_requests") {
     <color:blue>unique index friend_requests_ui01 (requester_id, replier_id)</color>
 }
 
-table(friends, "confirmed_friends") {
-    fk(user1, int8)
+table(friends, "friends") {
+    fk(userId, int8)
     ----
-    fk(user2, int8)
+    fk(friendId, int8)
     ----
     ----
-    <color:blue>unique index confirmed_friends_ui01 (user1, user2)</color>
+    <color:blue>unique index friends (user1, user2)</color>
 }
 
 table(films, "films") {
@@ -62,7 +62,7 @@ table(films, "films") {
     ----
     nn(name, varchar[100]) 
     ----
-    nn(description, varchar[100])
+    nn(description, varchar[200])
     ----
     nn(release_date, date) 
     ----

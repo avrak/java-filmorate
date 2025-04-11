@@ -1,72 +1,69 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    @Getter
-    private final InMemoryStorage inMemoryStorage;
-
-    public InMemoryUserStorage getUserStorage() {
-        return inMemoryStorage.getUserStorage();
-    }
-
-    public Map<Long, User> getUsers() {
-        return inMemoryStorage.getUserStorage().getAll();
-    }
+    private final UserRepository userRepository;
 
     public User create(User user) {
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
 
-        getUserStorage().create(user);
+        userRepository.save(user);
         return user;
     }
 
     public User update(User newUser) {
         checkUserId(newUser);
 
-        if (getUsers().containsKey(newUser.getId())) {
-            User oldUser = getUsers().get(newUser.getId());
+        Optional<User> oldUser = userRepository.findById(newUser.getId());
+
+        if (oldUser.isPresent()) {
 
             if (newUser.getLogin() != null) {
-                oldUser.setLogin(newUser.getLogin());
+                oldUser.get().setLogin(newUser.getLogin());
             }
 
             if (newUser.getName() != null) {
-                oldUser.setName(newUser.getName());
+                oldUser.get().setName(newUser.getName());
             }
 
             if (newUser.getEmail() != null) {
-                oldUser.setEmail(newUser.getEmail());
+                oldUser.get().setEmail(newUser.getEmail());
             }
+
             if (newUser.getBirthday() != null) {
-                oldUser.setBirthday(newUser.getBirthday());
+                oldUser.get().setBirthday(newUser.getBirthday());
             }
-            getUserStorage().update(oldUser);
-            return oldUser;
+
+            userRepository.update(oldUser.get());
+            return oldUser.get();
         }
 
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
     }
 
+    public Collection<User> findAll() {
+        return userRepository.findAll();
+    }
+
     public User getUserById(Long userId) {
-        User user = getUserStorage().getUserById(userId);
-        if (user == null) throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        return user;
+        Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) throw new NotFoundException("Пользователь с id " + userId + " не найден");
+
+        return user.get();
     }
 
     public void checkUserId(User user) {
@@ -76,51 +73,35 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        User user = getUserStorage().getUserById(userId);
-        User friend = getUserStorage().getUserById(friendId);
+        if (userId.equals(friendId))  throw new ParameterNotValidException("Друзья совпали с id " + userId);
 
-        if (user == null) throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        if (userRepository.findById(userId).isEmpty()) throw new NotFoundException("Пользователь с id " + userId + " не найден");
 
-        if (friend == null) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
+        if (userRepository.findById(friendId).isEmpty()) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
 
-        getUserStorage().addFriend(userId, friendId);
+        userRepository.saveFriends(userId, friendId);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
-        User user = getUserStorage().getUserById(userId);
+        if (userRepository.findById(userId).isEmpty()) throw new NotFoundException("Пользователь с id " + userId + " не найден");
 
-        if (user == null) throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        if (userRepository.findById(friendId).isEmpty()) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
 
-        if (getUserStorage().getUserById(friendId) == null) throw new NotFoundException("Пользователь с id " + friendId + " не найден");
-
-        getUserStorage().deleteFriend(userId, friendId);
+        userRepository.deleteFriends(userId, friendId);
     }
 
     public Collection<User> getFriends(Long userId) {
-        User user = getUserStorage().getUserById(userId);
+        if (userRepository.findById(userId).isEmpty())  throw new NotFoundException("Пользователь с id " + userId + " не найден");
 
-        if (user == null) throw new NotFoundException("Пользователь с id " + userId + " не найден");
-
-        return getUserStorage()
-                .getAll()
-                .values()
-                .stream()
-                .filter(friend -> user.getFriends().contains(friend.getId())).collect(Collectors.toList());
+        return userRepository.findFriendsByUserId(userId);
     }
 
     public Collection<User> getCommonFriends(Long firstUserId, Long secondUserId) {
-        User firstUser = getUserStorage().getUserById(firstUserId);
+        if (userRepository.findById(firstUserId).isEmpty())  throw new NotFoundException("Пользователь с id " + firstUserId + " не найден");
 
-        if (firstUser == null) throw new NotFoundException("Пользователь с id " + firstUserId + " не найден");
+        if (userRepository.findById(secondUserId).isEmpty())  throw new NotFoundException("Пользователь с id " + secondUserId + " не найден");
 
-        User secondUser = getUserStorage().getUserById(secondUserId);
-
-        if (secondUser == null) throw new NotFoundException("Пользователь с id " + secondUserId + " не найден");
-
-        Set<Long> commonFriends = new HashSet<>(firstUser.getFriends());
-        commonFriends.retainAll(secondUser.getFriends());
-
-        return getUsers().values().stream().filter(user -> commonFriends.contains(user.getId())).collect(Collectors.toList());
+        return userRepository.findCommonFriendsByUserId(firstUserId, secondUserId);
     }
 
 }

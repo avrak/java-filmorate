@@ -2,11 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.model.User;
 
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -14,17 +13,16 @@ import java.util.*;
 
 @Validated
 @RestController
+@Slf4j
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(UserController.class);
-
     private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        log.trace("Вывести список пользователей");
-        return  userService.getUserStorage().getAll().values();
+        log.info("Вывести список пользователей");
+        return  userService.findAll();
     }
 
     @GetMapping("/{userId}")
@@ -34,14 +32,14 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody @Valid User user) {
-        log.trace("Создать пользователя");
+        log.info("Создать пользователя");
 
         return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody @Valid User newUser) {
-        log.trace("Обновить пользователя");
+        log.info("Обновить пользователя");
 
         return userService.update(newUser);
     }
@@ -51,6 +49,7 @@ public class UserController {
             @PathVariable("id") Long userId,
             @PathVariable("friendId") Long friendId
     ) {
+        log.info("Создать друзей из " + userId + " и " + friendId);
         userService.addFriend(userId, friendId);
     }
 
@@ -60,7 +59,6 @@ public class UserController {
             @PathVariable("friendId") Long friendId
     ) {
         userService.deleteFriend(userId, friendId);
-        userService.deleteFriend(friendId, userId);
     }
 
     @GetMapping("/{id}/friends")

@@ -9,8 +9,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 @Data
 @Getter
@@ -27,5 +26,13 @@ public class User {
     private String name;
     @Past
     private LocalDate birthday;
-    private Set<Long> friends = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.getId());
+
+    }
 }
